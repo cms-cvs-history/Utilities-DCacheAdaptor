@@ -128,8 +128,8 @@ DCacheFile::open (const char *name,
   // ten difference in the amount of data read, and time spent
   // reading). Note also that docs say the flag turns off write
   // buffering -- this turns off all buffering.
-  if (flags & IOFlags::OpenUnbuffered)
-    dc_noBuffering (m_fd);
+  // if (flags & IOFlags::OpenUnbuffered)
+  //   dc_noBuffering (m_fd);
 
   m_close = true;
 
