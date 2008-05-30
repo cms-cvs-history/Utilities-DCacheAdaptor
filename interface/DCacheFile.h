@@ -10,22 +10,32 @@ class DCacheFile : public Storage
 public:
   DCacheFile (void);
   DCacheFile (IOFD fd);
-  DCacheFile (const char *name, int flags = IOFlags::OpenRead, int perms = 0666);
-  DCacheFile (const std::string &name, int flags = IOFlags::OpenRead, int perms = 0666);
+  DCacheFile (const char *name,
+              int flags = IOFlags::OpenRead,
+              int perms = 0666,
+              int dcacheBufferSize = -1);
+  DCacheFile (const std::string &name,
+              int flags = IOFlags::OpenRead,
+              int perms = 0666,
+              int dcacheBufferSize = -1);
   ~DCacheFile (void);
 
   virtual void	create (const char *name,
     			bool exclusive = false,
-    			int perms = 0666);
+    			int perms = 0666,
+                        int dcacheBufferSize = -1);
   virtual void	create (const std::string &name,
     			bool exclusive = false,
-    			int perms = 0666);
+    			int perms = 0666,
+                        int dcacheBufferSize = -1);
   virtual void	open (const char *name,
     		      int flags = IOFlags::OpenRead,
-    		      int perms = 0666);
+    		      int perms = 0666,
+                      int dcacheBufferSize = -1);
   virtual void	open (const std::string &name,
     		      int flags = IOFlags::OpenRead,
-    		      int perms = 0666);
+    		      int perms = 0666,
+                      int dcacheBufferSize = -1);
 
   using Storage::read;
   using Storage::write;

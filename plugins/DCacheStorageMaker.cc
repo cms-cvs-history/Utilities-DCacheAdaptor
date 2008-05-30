@@ -29,9 +29,11 @@ public:
   virtual Storage *open (const std::string &proto,
 			 const std::string &path,
 			 int mode,
-			 const std::string &tmpdir)
+			 const std::string &tmpdir,
+                         int dcacheBufferSize)
   {
-    return new DCacheFile (normalise (proto, path), mode);
+    int perms = 0666;
+    return new DCacheFile (normalise (proto, path), mode, perms, dcacheBufferSize);
   }
 
   virtual bool check (const std::string &proto,
