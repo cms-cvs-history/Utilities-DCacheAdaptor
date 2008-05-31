@@ -17,19 +17,17 @@ DCacheFile::DCacheFile (IOFD fd)
 
 DCacheFile::DCacheFile (const char *name,
     	    int flags /* = IOFlags::OpenRead */,
-    	    int perms /* = 066 */,
-            int dcacheBufferSize)
+    	    int perms /* = 066 */)
   : m_fd (EDM_IOFD_INVALID),
     m_close (false)
-{ open (name, flags, perms, dcacheBufferSize); }
+{ open (name, flags, perms); }
 
 DCacheFile::DCacheFile (const std::string &name,
     	    int flags /* = IOFlags::OpenRead */,
-    	    int perms /* = 066 */,
-            int dcacheBufferSize)
+    	    int perms /* = 066 */)
   : m_fd (EDM_IOFD_INVALID),
     m_close (false)
-{ open (name.c_str (), flags, perms, dcacheBufferSize); }
+{ open (name.c_str (), flags, perms); }
 
 DCacheFile::~DCacheFile (void)
 {
@@ -43,39 +41,35 @@ DCacheFile::~DCacheFile (void)
 void
 DCacheFile::create (const char *name,
 		    bool exclusive /* = false */,
-		    int perms /* = 066 */,
-                    int dcacheBufferSize)
+		    int perms /* = 066 */)
 {
   open (name,
         (IOFlags::OpenCreate | IOFlags::OpenWrite | IOFlags::OpenTruncate
          | (exclusive ? IOFlags::OpenExclusive : 0)),
-        perms, dcacheBufferSize);
+        perms);
 }
 
 void
 DCacheFile::create (const std::string &name,
                     bool exclusive /* = false */,
-                    int perms /* = 066 */,
-                    int dcacheBufferSize)
+                    int perms /* = 066 */)
 {
   open (name.c_str (),
         (IOFlags::OpenCreate | IOFlags::OpenWrite | IOFlags::OpenTruncate
          | (exclusive ? IOFlags::OpenExclusive : 0)),
-        perms, dcacheBufferSize);
+        perms);
 }
 
 void
 DCacheFile::open (const std::string &name,
                   int flags /* = IOFlags::OpenRead */,
-                  int perms /* = 066 */,
-                  int dcacheBufferSize)
-{ open (name.c_str (), flags, perms, dcacheBufferSize); }
+                  int perms /* = 066 */)
+{ open (name.c_str (), flags, perms); }
 
 void
 DCacheFile::open (const char *name,
                   int flags /* = IOFlags::OpenRead */,
-                  int perms /* = 066 */,
-                  int dcacheBufferSize)
+                  int perms /* = 066 */)
 {
   m_name = name;
 
@@ -129,18 +123,17 @@ DCacheFile::open (const char *name,
 
   m_fd = newfd;
 
-  // Disable buffering in dCache library or set the buffer size.
+  // Set the buffering readahead size for dCache.  The value chosen here was determined from
+  // a study done by Ian Fisk 31-May-2008
   // This can make dramatic difference to the system and client
   // performance (factors of ten difference in the amount of data
   // read, and time spent reading). Note also that docs incorrectly
   // say the flag turns off only write buffering -- this affects
   // all buffering.
-  if (dcacheBufferSize > 0) {
-    dc_setBufferSize(m_fd, dcacheBufferSize);
-  }
-  else if (dcacheBufferSize == 0) {
-    dc_noBuffering (m_fd);
-  }
+  // if (flags & IOFlags::OpenUnbuffered)
+  //   dc_noBuffering (m_fd);
+
+  dc_setBufferSize(m_fd, 64000);
 
   m_close = true;
 
@@ -216,7 +209,7 @@ DCacheFile::read (void *into, IOSize n)
       // end of file
       break;
     else if (s < ssize_t (n-done))
-      edm::LogWarning("DCacheFileWarning")
+      edm::LogInfo("DCacheFileWarning")
         << "dc_read(name='" << m_name << "', n=" << (n-done)
         << ") returned a short read of " << s << " bytes; "
         << "please report a bug in dCache referencing the "
